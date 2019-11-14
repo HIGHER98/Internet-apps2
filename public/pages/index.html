@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.18/vue.min.js"></script>
+    <title>Assignment 2</title>
+	</head>
+	<body>
+		<div id="app">
+			<button v-on:click="create">Create database</button>
+			<hr>
+			<button v-on:click="update">Update database</button>
+			<hr>
+			<button v-on:click="deletedb">Delete database</button>
+			<hr>
+			<input v-model="title">
+			<button v-on:click="query">Search Movie</button>
+			<hr>
+			<span v-if="response.length>0">
+				<!--Response goes here -->
+				<table>
+					<tbody>
+						<tr v-for="movies in response">
+							<td>{{movies}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</span>
+		</div>
+	</body>
+	<script>
+		var app = new Vue({
+			el:'#app',
+			data:{
+				response:[],
+				title:'King Kong,1933'
+			},
+			methods:{
+				create : createDB,
+				query  : queryMovieData,
+				deletedb : destroyDB,
+				update : updateDB
+			}
+		})
+
+	//Create the database and populate it
+	function createDB(){
+		console.log("Creating database");
+		fetch("/create")
+			.then(response => response.json())
+			.then(response => {
+				this.response.pop();
+				console.log(response);
+				this.response.push(response.Message);
+			})
+	}
+
+	//Query database based on movie/year
+	function queryMovieData(){
+		let r = new RegExp('(\,)');
+		let match = new RegExp('([A-Za-z0-9\s]){2,30}(\,){1,1}([0-9]{4,4})');
+		if(!match.test(this.title)){
+			console.log("Did not match");
+			this.response.pop();
+			this.response.push("Movie provided in wrong format");
+		} else {
+			console.log("Did match");
+		}
+		let title = this.title.split(r)[0];
+		let year = this.title.split(r)[2];
+
+		console.log("Querying:\t" + "Title:\t"+title+"\n\t\tYear:\t"+year);
+		fetch("/query/"+title+"/"+year)
+			.then(response => response.json())
+			.then(response => {
+				this.response = [];
+				console.log(response);
+				for(let i = 0; i < response.Message.length; i++){
+					this.response.push("Title: "+response.Message[i].title);
+					for(let j=0; j< response.Message[i].director.length; j++){
+						this.response.push("Director: "+response.Message[i].director[j])
+					}
+//					this.response.push("Released: "+Number(response.Message[i].realease));
+//					this.response.push("Runtime(minutes): "+`${response.Message[i].length_min}`);
+					this.response.push("Rating: "+response.Message[i].rating);
+					this.response.push("Rank: "+response.Message[i].rank);
+				}
+			})
+	}
+
+	function updateDB(){
+		console.log("Updating database...");
+		fetch("/update")
+			.then(response => response.json())
+			.then(response => {
+				this.response = [];
+				console.log(response);
+				this.response.push(response.Message);
+			})
+	}
+
+	//Destroy the database
+	function destroyDB(){
+		console.log("Deleting table");
+		fetch("/destroy")
+			.then(response => response.json())
+			.then(response => {
+				this.response = [];
+				console.log(response);
+				this.response.push(response.Message);
+			})
+	}
+	</script>
+<html>
