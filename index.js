@@ -14,8 +14,8 @@ const AWSglobal = require('aws-sdk/global');
 // import individual service
 const S3 = require('aws-sdk/clients/s3');
 
-const publicKey = 'AKIATTMXSM2AG7EL7XNW';
-const privateKey = '1RbQpVnJPTiwo1TIq0lO8bzJsN8zYJLMBko/hWXR';
+const publicKey = '';
+const privateKey = '';
 
 AWS.config.update({
 	region: "eu-west-1",
